@@ -7,7 +7,6 @@ A password variation generator inspired by [Th3S3cr3tAg3nt/Munge](https://github
 3. More flexible and customizable password variations.
 
 **How to use?**
-1. Provide the keywords.txt to gen_pwdlist_on_keywords.py
-2. There will be a file combinations.txt
-3. Provide this combinations.txt to mungle.py 
+1. Run file gen_pwdlist_on_keywords.py to generate combinations.txt
+3. Provide the combinations.txt to mungle.py to get the comprehensive password list
 
