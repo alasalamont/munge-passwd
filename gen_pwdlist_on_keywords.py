@@ -1,16 +1,21 @@
 import itertools
+import colorama
+from colorama import Fore, Style
+
+colorama.init(autoreset=True)
 
 # Function to display how the script works
 def display_how_it_works():
-    print("""
-HOW THIS SCRIPT WORKS:
-+ Generates a list of passwords (combinations.txt) based on keyword combinations.
+    print(f"""
+{Fore.YELLOW}HOW THIS SCRIPT WORKS:
+{Fore.GREEN}+ Generates a list of passwords (combinations.txt) based on keyword combinations.
 + Ensures combinations end with only a valid word or number.
 → No special characters will be at the end.
 
-WHY NO SPECIAL CHARS AT THE END?
-+ The generated combinations.txt will be used by munge.py, which also adds the most common suffixes at the end.
+{Fore.YELLOW}WHY NO SPECIAL CHARS AT THE END?
+{Fore.GREEN}+ The generated combinations.txt will be used by munge.py, which also adds the most common suffixes at the end.
 → For more details, check dictionaries.py.
+{Style.RESET_ALL}
 """)
 
 # Function to return lowercase, capitalized, and uppercase versions of the word
@@ -27,28 +32,33 @@ def is_valid_combination(combination):
 
 # Get user input for keywords
 def get_keywords():
+    # Display the prompt only once
+    print(f"{Fore.CYAN}[+] Please provide the keywords, it could be a word, number, or special chars, and separate them by commas.")
+    print(f"{Fore.CYAN}[+] Ex: du, cloud, 2023, 2024, @, `, ~")
+    
     all_keywords = []
-
+    
     while True:
-        print("[+] Please provide the keywords, it could be a word, number, or special chars, and separate them by commas.")
-        print("[+] Ex: du, cloud, 2023, 2024, @, `, ~")
+        user_input = input(Fore.YELLOW + "[+] Enter your keywords: ").strip()
         
-        user_input = input("[+] Enter your keywords: ").strip()
+        if not user_input:
+            print(Fore.RED + "[!] Please enter some keywords.")
+            continue
         
         # Split the input by commas, remove extra spaces, and ensure no empty strings
         keywords = [word.strip() for word in user_input.split(',') if word.strip()]
         all_keywords.extend(keywords)
         
         # Ask user if they want to add more
-        more_input = input("[?] Do you want to add more? [1] Yes [2] No: ").strip().lower()
+        more_input = input(Fore.YELLOW + "[?] Do you want to add more? [1] Yes [2] No: ").strip().lower()
         
         if more_input in ['no', 'n', '2']:  # Stop if user chooses 'no' or '2'
             break
         elif more_input not in ['yes', 'y', '1']:  # Re-prompt if invalid input
-            print("[!] Invalid input, stopping the process.")
+            print(Fore.RED + "[!] Invalid input, stopping the process.")
             break
 
-    print(f"[+] Final list of keywords: {all_keywords}")
+    print(f"{Fore.GREEN}[+] Final list of keywords: {all_keywords}")
     
     return all_keywords
 
