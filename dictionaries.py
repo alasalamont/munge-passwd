@@ -3,6 +3,8 @@ leetspeak_dic: This is a dictionary containing a mapping of characters to their 
 
 suffixes: This is a list of common suffixes that users often append to passwords. It includes numeric sequences (123, 456), repeated characters (!!!, ###), special characters (@, $), common keyboard patterns (qwerty, asd), and current or recent years (2020, 2023). These suffixes are often predictable and used by people to meet password complexity requirements while remaining easy to remember.
 """
+
+
 leetspeak_dict = {
     1: {
         "a": ["4", "@"],
