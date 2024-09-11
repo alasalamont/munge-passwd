@@ -1,6 +1,7 @@
 import itertools
 import colorama
 from colorama import Fore, Style
+import os
 
 colorama.init(autoreset=True)
 
@@ -49,18 +50,15 @@ def get_keywords():
         keywords = [word.strip() for word in user_input.split(',') if word.strip()]
         all_keywords.extend(keywords)
         
-        # Ask user if they want to add more
-        more_input = input(Fore.YELLOW + "[?] Do you want to add more? [1] Yes [2] No: ").strip().lower()
-        
-        if more_input in ['no', 'n', '2']:  # Stop if user chooses 'no' or '2'
-            break
-        elif more_input not in ['yes', 'y', '1']:  # Re-prompt if invalid input
-            print(Fore.RED + "[!] Invalid input, stopping the process.")
-            break
-
-    print(f"{Fore.GREEN}[+] Final list of keywords: {all_keywords}")
-    
-    return all_keywords
+        # Force valid input for the "Do you want to add more?" question
+        while True:
+            more_input = input(Fore.YELLOW + "[?] Do you want to add more? [1] Yes [2] No: ").strip().lower()
+            if more_input in ['no', 'n', '2']:  # Stop if user chooses 'no' or '2'
+                return list(dict.fromkeys(all_keywords))  # Remove duplicates and return
+            elif more_input in ['yes', 'y', '1']:  # Continue if user chooses 'yes' or '1'
+                break
+            else:
+                print(Fore.RED + "[!] Invalid input, please choose either '1' (Yes) or '2' (No).")
 
 def main():
     # Display the explanation before the script runs
@@ -69,8 +67,12 @@ def main():
     # Get keywords from the user
     keywords = get_keywords()
 
+    # Display the final keywords list before proceeding
+    print(f"{Fore.GREEN}[+] Final list of keywords: {keywords}")
+    
     # Open a file to save the combinations
-    with open("combinations.txt", "w") as f:
+    output_file = "combinations.txt"
+    with open(output_file, "w") as f:
         # Generate permutations of length 3 and 4
         for length in range(3, 5):
             combinations = itertools.permutations(keywords, length)
@@ -81,6 +83,10 @@ def main():
                     # Create all possible combinations of lowercase/capitalized/uppercase versions
                     for variant_combination in itertools.product(*variants):
                         f.write(''.join(variant_combination) + '\n')  # Write to file
+
+    # Print the path to the output file
+    abs_path = os.path.abspath(output_file)
+    print(f"{Fore.GREEN}[+] Please check file combinations.txt at {abs_path}")
 
 if __name__ == "__main__":
     main()
