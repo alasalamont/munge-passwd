@@ -1,28 +1,3 @@
-"""
-This module generates variations of passwords based on the input passlist file, 
-with varying levels of complexity and leetspeak transformations.
-
-Authors: iqthegoat & stochasticsanity
-Based on the work done by Th3S3cr3tAg3nt
-
-Functions:
-- generate_wordlist(word_and_level: Tuple[str, int]) -> List[str]: 
-    - Generates a list of variations of a given word based on the specified level.
-    - Variations include:
-      - Basic transformations: capitalized, uppercased, swapcased, and reversed words.
-      - Leetspeak transformations based on levels.
-      - Advanced transformations for levels above 8, including recursive leetspeak and reversed leetspeak variations.
-
-- generate_lines(source: io.TextIOWrapper, level: int) -> List[Tuple[str, int]]: 
-    - Generates a list of tuples containing words with appended suffixes, 
-      number ranges, and years, and assigns them the specified level.
-
-- munge(arguments: argparse.Namespace) -> None: 
-    - Uses generate_wordlist() and generate_lines() to create variations of
-      passwords, applying leetspeak and word mutations, and writes them to an output file.
-"""
-
-
 import argparse
 from multiprocessing import Pool
 import io
@@ -31,12 +6,25 @@ import time
 from typing import List, Tuple
 import colorama
 import random  # Added for random leetspeak selection
-
 import dictionaries
+
+colorama.init(autoreset=True)
 
 LEET_DICT = dictionaries.leetspeak_dict
 SUFFIXES = dictionaries.suffixes
 
+# Function to display how the script works
+def display_how_script_works():
+    print(f"""
+{colorama.Fore.YELLOW}HOW SCRIPT WORKS?
+{colorama.Fore.GREEN}+ This script will take a file input which is a password list
++ Then it will apply leetspeak transformations to characters. For example: the character 'a' can become '@' or '4'.
++ It will also append common suffixes at the end.
++ Check the file dictionaries.py to understand more about the leetspeak transformations and suffixes.
+{colorama.Style.RESET_ALL}
+""")
+
+# Function to return wordlist based on leetspeak transformations
 def generate_wordlist(word_and_level: Tuple[str, int]) -> List[str]:
     wordlist = []
     word, level = word_and_level
@@ -65,18 +53,8 @@ def generate_wordlist(word_and_level: Tuple[str, int]) -> List[str]:
 
     return wordlist
 
+# Function to generate lines from the input passlist
 def generate_lines(source: io.TextIOWrapper, level: int) -> List[Tuple[str, int]]:
-    """
-    Generates a list of tuples containing a word and its corresponding level.
-    Also appends range and suffix additions to the words.
-
-    Args:
-        source (io.TextIOWrapper): The input passlist file.
-        level (int): The level of variation to generate.
-
-    Returns:
-        List[Tuple[str, int]]: A list of tuples containing a word and its corresponding level.
-    """
     favored_number_ranges = [
         range(24),
         range(50, 99, 10),
@@ -96,19 +74,11 @@ def generate_lines(source: io.TextIOWrapper, level: int) -> List[Tuple[str, int]
         for i in range(1970, 2015):
             word_variants.append(wrd + str(i))
 
-    # Create tuples (word, level) at the end
     lines = [(word_variant, level) for word_variant in set(word_variants)]
-
     return lines
 
+# Function to munge the passwords
 def munge(args: argparse.Namespace) -> None:
-    """
-    Uses generate_wordlist() and generate_lines() to create variations of 
-    passwords and write them to an output file.
-    
-    Args:
-        arguments (argparse.Namespace): The parsed command-line arguments.
-    """
     if args.verbose:
         start = time.time()
 
@@ -129,28 +99,48 @@ def munge(args: argparse.Namespace) -> None:
 
     with open(args.output, "a", encoding="utf-8", errors="ignore") as out:
         for word in setted:
-            out.write(word.strip().replace(" ","")+ "\n")
+            out.write(word.strip().replace(" ", "") + "\n")
 
     if args.verbose:
         settled_len = len(setted)
-        if settled_len == 0:
-            pass
         print(
             colorama.Fore.GREEN
-            + f"GENERATED {settled_len} IN {str(int(time.time() - start))} seconds\n"
-            + f"output  -> {args.output}\n"
-            + f"level   -> {args.level}\n"
-            + f"verbose -> {args.verbose}"
+            + f"GENERATED {settled_len} passwords IN {str(int(time.time() - start))} seconds\n"
+            + f"Output file -> {args.output}\n"
+            + f"Level       -> {args.level}\n"
+            + f"Verbose     -> {args.verbose}"
         )
 
+# Custom error handler to display epilog (example)
+class CustomArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        print(f"{colorama.Fore.RED}[!] Error: {message}{colorama.Style.RESET_ALL}")
+        self.print_help()  # Print the help (usage and epilog)
+        self.exit(2)
+
+# Main function to handle argument parsing
 if __name__ == "__main__":
-    colorama.init()
-    parser = argparse.ArgumentParser(description="Generate variations of passwords")
+    display_how_script_works()  # Show how the script works before parsing args
+
+    parser = CustomArgumentParser(description="Generate variations of passwords")
+    
+    # Custom usage and example message
+    parser.usage = f"{colorama.Fore.RED}[!] Usage: <script-name> -i <file-combination> -o <output> -l <level>{colorama.Style.RESET_ALL}"
+    parser.epilog = f"{colorama.Fore.RED}[!] Example: <script-name> -i combinations.txt -o passwd_list.txt -l 8{colorama.Style.RESET_ALL}"
+    
     parser.add_argument("-i", "--input", type=str, required=True, help="Passlist input file")
     parser.add_argument("-o", "--output", type=str, help="Munged passlist output file")
     parser.add_argument("-l", "--level", type=int, help="Level [0-8] (default 5)", default=5)
     parser.add_argument("-v", "--verbose", action="store_true",
-                        help="Whether to print anything or not", default=False)
+                        help="Whether to print verbose output or not", default=False)
+
     arguments = parser.parse_args()
 
+    # Check for valid level input
+    if arguments.level > 8:
+        print(f"{colorama.Fore.RED}[!] Error: Maximum level is 8.{colorama.Style.RESET_ALL}")
+        parser.print_help()
+        exit(1)
+
+    # Run the munge function
     munge(arguments)
