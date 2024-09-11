@@ -38,24 +38,8 @@ LEET_DICT = dictionaries.leetspeak_dict
 SUFFIXES = dictionaries.suffixes
 
 def generate_wordlist(word_and_level: Tuple[str, int]) -> List[str]:
-    """
-    Generates a list of variations of a given word based on the specified level. 
-
-    The variations include:
-    - The original word, capitalized, uppercased, swapcased, 
-      and capitalized swapcased versions of the word.
-    - Leetspeak variations of these word versions based on the level.
-
-    Args:
-        word_and_level (Tuple[str, int]): A tuple containing a word and a level.
-            word (str): The original word to generate variations of.
-            level (int): The higher the level, the more complex the variations.
-
-    Returns:
-        List[str]: A list of variations of the original word, dependent on the level.
-    """
     wordlist = []
-    word, level = word_and_level  # Unpack word and level from the tuple
+    word, level = word_and_level
 
     capitalized = word.capitalize()
     uppered = word.upper()
@@ -63,16 +47,6 @@ def generate_wordlist(word_and_level: Tuple[str, int]) -> List[str]:
     capswapcased = capitalized.swapcase()
 
     def add_to_wordlist(key: int, word_variant: str) -> None:
-        """
-        Converts a given word variant into leetspeak and appends it to the wordlist.
-
-        Args:
-            key (int): The key for the leetspeak dictionary to use.
-            word_variant (str): The variant of the original word to convert into leetspeak.
-
-        Returns:
-            None: This function modifies the 'wordlist' variable in place.
-        """
         leeted_words = ''.join(
             [random.choice(LEET_DICT[key].get(x.lower(), [x])) if x.lower() in LEET_DICT[key] else x for x in word_variant]
         )
@@ -82,20 +56,12 @@ def generate_wordlist(word_and_level: Tuple[str, int]) -> List[str]:
         wordlist.extend([word, capitalized, uppered, swapcased, capswapcased])
     if level > 1:
         add_to_wordlist(1, word)
-    if level > 2:
-        add_to_wordlist(2, word)
     if level > 3:
         add_to_wordlist(1, swapcased)
-    if level > 4:
-        add_to_wordlist(2, swapcased)
     if level > 5:
         add_to_wordlist(1, capitalized)
-    if level > 6:
-        add_to_wordlist(2, capitalized)
     if level > 7:
         add_to_wordlist(1, capswapcased)
-    if level >= 8:
-        add_to_wordlist(2, capswapcased)
 
     return wordlist
 
