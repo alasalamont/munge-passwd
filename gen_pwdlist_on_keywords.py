@@ -60,6 +60,16 @@ def get_keywords():
             else:
                 print(Fore.RED + "[!] Invalid input, please choose either '1' (Yes) or '2' (No).")
 
+# Function to insert special characters in the middle of keywords if they are present
+def insert_special_characters(combination):
+    result = []
+    for i, word in enumerate(combination):
+        result.append(word)
+        # If the next word is alphanumeric and the current one is not, insert the special character between
+        if i < len(combination) - 1 and not word.isalnum() and combination[i+1].isalnum():
+            result.append(word)
+    return result
+
 def main():
     # Display the explanation before the script runs
     display_how_it_works()
@@ -67,19 +77,30 @@ def main():
     # Get keywords from the user
     keywords = get_keywords()
 
+    # Separate special characters and normal keywords
+    words = [kw for kw in keywords if kw.isalnum()]  # Letters or numbers
+    special_chars = [kw for kw in keywords if not kw.isalnum()]  # Special characters
+
     # Display the final keywords list before proceeding
     print(f"{Fore.GREEN}[+] Final list of keywords: {keywords}")
     
     # Open a file to save the combinations
     output_file = "combinations.txt"
     with open(output_file, "w") as f:
-        # Generate permutations of length 3 and 4
-        for length in range(3, 5):
+        # Write single keyword variants
+        for word in keywords:
+            for variant in generate_variants(word):
+                f.write(variant + '\n')
+
+        # Generate permutations of length 2 to 4
+        for length in range(2, 5):
             combinations = itertools.permutations(keywords, length)
             for combination in combinations:
                 if is_valid_combination(combination):  # Ensure no special character at the end
+                    # Insert special characters between words
+                    extended_combination = insert_special_characters(combination)
                     # Generate variants for each word in the combination
-                    variants = [generate_variants(word) for word in combination]
+                    variants = [generate_variants(word) for word in extended_combination]
                     # Create all possible combinations of lowercase/capitalized/uppercase versions
                     for variant_combination in itertools.product(*variants):
                         f.write(''.join(variant_combination) + '\n')  # Write to file
