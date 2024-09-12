@@ -20,6 +20,7 @@ def display_how_script_works():
 {colorama.Fore.GREEN}+ This script will take a file input which is a password list
 + Then it will apply leetspeak transformations to characters. For example: the character 'a' can become '@' or '4'.
 + It will also append common suffixes at the end.
++ The original passwords will also be preserved in the output.
 + Check the file dictionaries.py to understand more about the leetspeak transformations and suffixes.
 {colorama.Style.RESET_ALL}
 """)
@@ -82,6 +83,11 @@ def munge(args: argparse.Namespace) -> None:
     if args.verbose:
         start = time.time()
 
+    # Read the original password list from the input file (combinations.txt)
+    with io.open(args.input, "r", encoding="utf-8", errors="ignore") as source:
+        original_passwords = [line.strip() for line in source.readlines()]
+
+    # Generate leetspeak transformations and variants
     with io.open(args.input, "r", encoding="utf-8", errors="ignore") as source:
         lines = generate_lines(source, args.level)
 
@@ -97,7 +103,13 @@ def munge(args: argparse.Namespace) -> None:
         filename, file_extension = os.path.splitext(args.input)
         args.output = f"{filename}_munged{file_extension}"
 
+    # Append both original passwords and munged passwords to the output file
     with open(args.output, "a", encoding="utf-8", errors="ignore") as out:
+        # Write original passwords first
+        for word in original_passwords:
+            out.write(word + "\n")
+        
+        # Write leetspeak-transformed passwords
         for word in setted:
             out.write(word.strip().replace(" ", "") + "\n")
 
